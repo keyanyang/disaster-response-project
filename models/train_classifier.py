@@ -1,24 +1,74 @@
 import sys
+import pickle
+import pandas as pd
+import numpy as np
+from sqlalchemy import create_engine
+
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+nltk.download(['punkt', 'wordnet'])
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.metrics import classification_report
 
 
 def load_data(database_filepath):
-    pass
+    # load data from database
+    engine = create_engine(f'sqlite:///{database_filepath}')
+    df = pd.read_sql_table('Message', engine)
+    X = df['message'].values
+    Y = df[list(df)[4:]]
+    category_names = Y.columns
+    return X, Y, category_names
 
 
 def tokenize(text):
-    pass
+    tokens = word_tokenize(text)
+    lemmatizer = WordNetLemmatizer()
+
+    clean_tokens = []
+    for tok in tokens:
+        clean_tok = lemmatizer.lemmatize(tok).lower().strip()
+        clean_tokens.append(clean_tok)
+
+    return clean_tokens
 
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
+
+    parameters = {
+        # 'tfidf__use_idf': (True, False),
+        # 'vect__ngram_range': ((1, 1), (1, 2)),
+        'clf__estimator__n_estimators': [50, 100],
+        # 'clf__estimator__min_samples_split': [2, 4],
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters, verbose=2, n_jobs=-1)
+    return cv
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
+    y_pred = model.predict(X_test)
+    # check the second warning from https://scikit-learn.org/stable/modules/multiclass.html
+    # print(classification_report(y_pred, Y_test.values, target_names=category_names))
+    print('Mean Accuracy Score: {}'.format(np.mean(Y_test.values == y_pred)))
 
 
 def save_model(model, model_filepath):
-    pass
+    pickle.dump(model, open(model_filepath, 'wb'))
 
 
 def main():
