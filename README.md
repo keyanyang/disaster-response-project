@@ -12,3 +12,32 @@
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+
+Project Organization
+------------
+
+    ├── README.md                       <- The top-level README for developers using this project
+    ├── app
+    │   ├── run.py                      <- Flask file that runs app
+    │   └── templates                   <- HTML templates for Flask app
+    │       ├── go.html                 <- classification result page of web app
+    │       └── master.html             <- main page of web app
+    │
+    ├── data
+    │   ├── disaster_categories.csv     <- data to process
+    │   ├── disaster_messages.csv       <- data to process
+    │   ├── DisasterResponse.db         <- database to save clean data to
+    │   └── process_data.py             <- Python file that loads, cleans and saves data
+    │
+    ├── models
+    │   └── train_classifier.py         <- Python file that loads, trains and explorts the final model
+    │
+    └── requirements.txt                <- The requirements file for reproducing the analysis environment
+
+--------
+
+### Homepage Screenshot
+<p align="center">
+<img src="screenshots/homepage.png">
+</p>
