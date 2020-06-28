@@ -17,10 +17,26 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.model_selection import GridSearchCV
 from sklearn.ensemble import RandomForestClassifier
 
-from sklearn.metrics import classification_report
+from sklearn.metrics import classification_report, accuracy_score
 
 
 def load_data(database_filepath):
+    """Load data from SQLite database and split it into predictor variable, response variables and category names.
+
+    Parameters
+    ----------
+    database_filepath : str
+        The file location of the SQLite database
+
+    Returns
+    -------
+    X: Series
+        predictor variablbe as feature
+    Y: DataFrame
+        response variables as target
+    category_names: list
+        list of column names of target
+    """
     # load data from database
     engine = create_engine(f'sqlite:///{database_filepath}')
     df = pd.read_sql_table('Message', engine)
@@ -31,6 +47,18 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    """Apply case normalization, lemmatize and tokenize text.
+
+    Parameters
+    ----------
+    text : str
+        Text in source format
+
+    Returns
+    -------
+    list
+        a cleaned tokenized list
+    """
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -43,6 +71,17 @@ def tokenize(text):
 
 
 def build_model():
+    """Builds classification model.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    Object
+        a multi-output classification model
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -61,13 +100,42 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """Evaluate the model against a test dataset.
+
+    Parameters
+    ----------
+    text : str
+        Text in source format
+
+    Returns
+    -------
+    list
+        a cleaned tokenized list
+    """
     y_pred = model.predict(X_test)
     # check the second warning from https://scikit-learn.org/stable/modules/multiclass.html
     # print(classification_report(y_pred, Y_test.values, target_names=category_names))
-    print('Mean Accuracy Score: {}'.format(np.mean(Y_test.values == y_pred)))
+    for i, col in enumerate(category_names):
+        print(f"Accuracy scores for {col} is {accuracy_score(Y_test.values[:,i], y_pred[:,i])}")
+    print('-' * 50)
+    print(f'Mean Accuracy Score: {np.mean(Y_test.values == y_pred)}')
 
 
 def save_model(model, model_filepath):
+    """Save the model as a pickle file.
+
+    Parameters
+    ----------
+    model : Object
+        Trained model to be saved
+    model_filepath: str
+        The location of the pickle file
+
+    Returns
+    -------
+    list
+        a cleaned tokenized list
+    """
     pickle.dump(model, open(model_filepath, 'wb'))
 
 

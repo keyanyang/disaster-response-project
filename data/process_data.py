@@ -4,6 +4,20 @@ from sqlalchemy import create_engine
 
 
 def load_data(messages_filepath, categories_filepath):
+    """Load messages and categories from csv files into a pandas dataframe.
+
+    Parameters
+    ----------
+    messages_filepath : str
+        The file location of the messages csv file
+    categories_filepath : str
+        The file location of the categories csv files
+
+    Returns
+    -------
+    DataFrame
+        a pandas dataframe including messages and categories data
+    """
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = messages.merge(categories, on='id')
@@ -11,6 +25,18 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    """Clean data by converting the category column into multiple boolean columns.
+
+    Parameters
+    ----------
+    df : DataFrame
+        A pandas dataframe including original messages and categories data
+
+    Returns
+    -------
+    DataFrame
+        Cleaned pandas dataframe including messages and categories data
+    """
     # create a dataframe of the 36 individual category columns
     categories = df['categories'].str.split(';', expand=True)
     # select the first row of the categories dataframe
@@ -36,6 +62,19 @@ def clean_data(df):
 
 
 def save_data(df, database_filename):
+    """Save data from a pandas dataframe into SQLite database.
+
+    Parameters
+    ----------
+    df : DataFrame
+        A cleaned pandas dataframe including messages and categories data
+    database_filename: str
+        The file location of database output
+
+    Returns
+    -------
+    None
+    """
     engine = create_engine(f'sqlite:///{database_filename}')
     df.to_sql('Message', engine, index=False)
 
