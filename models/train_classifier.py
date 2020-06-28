@@ -114,9 +114,9 @@ def evaluate_model(model, X_test, Y_test, category_names):
     """
     y_pred = model.predict(X_test)
     # check the second warning from https://scikit-learn.org/stable/modules/multiclass.html
-    # print(classification_report(y_pred, Y_test.values, target_names=category_names))
     for i, col in enumerate(category_names):
-        print(f"Accuracy scores for {col} is {accuracy_score(Y_test.values[:,i], y_pred[:,i])}")
+        print(f'Report for {col}')
+        print(classification_report(Y_test[col], y_pred[:, i]))
     print('-' * 50)
     print(f'Mean Accuracy Score: {np.mean(Y_test.values == y_pred)}')
 
